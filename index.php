@@ -12,10 +12,11 @@ $userString = $url['urlss'];
 
 // VLOŽENO BANKOVEK
 $totalAmount = user($userString);
-echo "Vloženo:" . $totalAmount;
+echo "Vloženo:" . $totalAmount . "<br>";
 
 // NAŠTENÍ SQL DAT PRO DALŠÍ POUŽITÍ
 $userDatabase = getUserData($userString);
+
 
 //NÁKUP
 if (isset($userDatabase) && is_null($userDatabase['order_id'])) {
@@ -26,6 +27,7 @@ if (isset($userDatabase) && is_null($userDatabase['order_id'])) {
     }
 }
 
+
 // ULOŽIT SMĚNY Z COINMATE DO "transactions" DATABÁZE
 if (isset($userDatabase) && isset($userDatabase['order_id'])) {
     $orderId = $userDatabase['order_id'];
@@ -33,15 +35,26 @@ if (isset($userDatabase) && isset($userDatabase['order_id'])) {
     // Řádek nebyl nalezen, uložit do databáze
     $transactionsDatabase = getTransactionsOrderId($orderId);
     if (empty($transactionsDatabase)) {
-        saveTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orderId);
+        $price = saveTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orderId);
+        echo $price['total'];
     }
 }
 
 
-getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orderId);
+// STATUS
+if (isset($userDatabase) && isset($userDatabase['order_id'])) {
+    $orderId = $userDatabase['order_id'];
+    $price = getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orderId);
+    echo $price['total'];
+    echo "<br>";
+    echo $price['user_status'];
+}
 
 
-/*
-displayUserStatus($user);
+
+
+
+displayUserStatus($userString);
+
+
 sendBTC($user, $clientId, $publicKey, $privateKey, $nonce);
-*/

@@ -140,10 +140,16 @@ function saveTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $ord
 
     // Kontrola úspěchu
     if (DB::affectedRows() > 0) {
-        return $totalBTC;
+        return [
+            'total' => $totalBTC,
+            'fee' => $totalFee
+        ];
     } else {
         return "Nepodařilo se uložit transakci do databáze.";
     }
+
+
+   
 }
 
 
@@ -185,7 +191,7 @@ function getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orde
     if (!$responseData['error'] && isset($responseData['data'])) {
         foreach ($responseData['data'] as $transaction) {
 
-
+            $status = $transaction['status'];
             if ($transaction['orderId'] == $orderId) {
                 $totalBTC += $transaction['amount'];
                 $totalFee += $transaction['fee'];
@@ -196,10 +202,32 @@ function getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orde
     $totalBTC = number_format($totalBTC, 8);
     $totalFee = number_format($totalFee, 8);
 
-    echo "Nakoupeno: " . $totalBTC . " BTC<br>";
-    echo "Poplatek: " . $totalFee . " CZK<br>";
+    //echo "Nakoupeno: " . $totalBTC . " BTC<br>";
+    //echo "Poplatek: " . $totalFee . " CZK<br>";
 
-    return $totalBTC;
+
+
+    if ($status == "OK") {
+        $user_status = "Status: " . "Transakce byla přijata na vaši peněženku" . "<br>";
+    } elseif ($status == "NEW") {
+        $user_status = "Status: " . "Transakce byla zaregistrována, ale ještě nebyla zpracována" . "<br>";
+    } elseif ($status == "SENT") {
+        $user_status = "Status: " . "Transakce byla odeslána" . "<br>";
+    } elseif ($status == "CANCELED") {
+        $user_status = "Status: " . "Transakce byla zrušena, zkuste to později nebo kontaktujte technickou podporu." . $status . "<br>";
+    } else {
+        $user_status = $status;
+    }
+
+
+    return [
+        'total' => $totalBTC,
+        'fee' => $totalFee,
+        'status' => $status,
+        'user_status' => $user_status
+    ];
+    
+    
 }
 
 
@@ -256,17 +284,5 @@ function withdrawal($clientId, $publicKey, $privateKey, $nonce, $address, $amoun
     } else {
         echo "Transakce neproběhla, došlo k chybě.";
     }
-
-
-    if ($status == "OK") {
-        echo "Status: " . "Transakce byla přijata na vaši peněženku" . "<br>";
-    } elseif ($status == "NEW") {
-        echo "Status: " . "Transakce byla zaregistrována, ale ještě nebyla zpracována" . "<br>";
-    } elseif ($status == "SENT") {
-        echo "Status: " . "Transakce byla odeslána" . "<br>";
-    } elseif ($status == "CANCELED") {
-        echo "Status: " . "Transakce byla zrušena, zkuste to později nebo kontaktujte technickou podporu." . $status . "<br>";
-    } else {
-        echo $status;
-    }
+    return $status;
 }

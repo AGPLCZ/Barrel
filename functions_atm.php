@@ -85,12 +85,12 @@ function executePurchase($user, $clientId, $publicKey, $privateKey, $nonce)
 
 
 // pošli BTC
-function sendBTC($user, $clientId, $publicKey, $privateKey, $nonce)
+function sendBTC($userString, $clientId, $publicKey, $privateKey, $nonce)
 {
     if (isset($_POST["btc"])) {
         $address = $_POST["adress"];
-        $totalBTC = getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $user['order_id']);
-        return withdrawal($clientId, $publicKey, $privateKey, $nonce, $address, $totalBTC);
+        $totalBTC = getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $userString['order_id']);
+        return withdrawal($clientId, $publicKey, $privateKey, $nonce, $address, $totalBTC['total']);
     }
     return null;
 }
