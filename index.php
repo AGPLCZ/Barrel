@@ -27,6 +27,7 @@ if (isset($userDatabase) && is_null($userDatabase['order_id'])) {
     $orderId = executePurchase($userDatabase, $clientId, $publicKey, $privateKey, $nonce);
     if ($orderId) {
         redirection($base_url, $userString);
+        exit;
     }
 }
 
@@ -39,20 +40,10 @@ if (isset($userDatabase) && isset($userDatabase['order_id'])) {
     $transactionsDatabase = getTransactionsOrderId($orderId);
     if (empty($transactionsDatabase)) {
         $price = saveTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orderId);
-        echo $price['total'];
+        echo "Nakoupeno: " . $price['total'] . "BTC";
     }
 }
 
-
-
-// STATUS
-if (isset($userDatabase) && isset($userDatabase['order_id'])) {
-    $orderId = $userDatabase['order_id'];
-    $price = getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orderId);
-    echo $price['total'];
-    echo "<br>";
-    echo $price['user_status'];
-}
 
 
 
@@ -60,11 +51,23 @@ if (isset($userDatabase) && isset($userDatabase['order_id'])) {
 if (isset($_POST["submit"])) {
     $validator = new Kielabokkie\Bitcoin\AddressValidator();
     $address = $_POST["address"];
+
+
+    // STATUS
+    if (isset($userDatabase) && isset($userDatabase['order_id'])) {
+        $orderId = $userDatabase['order_id'];
+        $price = getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orderId);
+        echo "Nakoupeno: " . $price['total'] . "BTC";
+        echo "<br>";
+        //echo $price['fee'];
+    }
+
     if ($validator->isValid($address)) {
         echo "Bitcoinová adresa je platná.";
         //sendBTC($userString, $clientId, $publicKey, $privateKey, $nonce,$adress);
     } else {
-        echo "Bitcoinová adresa je neplatná.";
+        echo
+        "Bitcoinová adresa je neplatná.";
     }
 }
 
@@ -80,11 +83,18 @@ if (isset($_POST["submit"])) {
 </head>
 
 <body>
-    <form action="index.php" method="post">
-        <input type="text" name="address" placeholder="BTC adresa">
-        <button type="submit" name="submit">Odeslat</button>
-    </form>
 
+    <?php
+
+    if (!isset($_POST["submit"])) :
+
+    ?>
+        <form action="index.php" method="post">
+            <input type="text" name="address" placeholder="BTC adresa">
+            <button type="submit" name="submit">Odeslat</button>
+        </form>
+
+    <? endif ?>
 </body>
 
 </html>

@@ -191,7 +191,6 @@ function getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orde
     if (!$responseData['error'] && isset($responseData['data'])) {
         foreach ($responseData['data'] as $transaction) {
 
-            $status = $transaction['status'];
             if ($transaction['orderId'] == $orderId) {
                 $totalBTC += $transaction['amount'];
                 $totalFee += $transaction['fee'];
@@ -205,26 +204,9 @@ function getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orde
     //echo "Nakoupeno: " . $totalBTC . " BTC<br>";
     //echo "Poplatek: " . $totalFee . " CZK<br>";
 
-
-
-    if ($status == "OK") {
-        $user_status = "Status: " . "Transakce byla přijata na vaši peněženku" . "<br>";
-    } elseif ($status == "NEW") {
-        $user_status = "Status: " . "Transakce byla zaregistrována, ale ještě nebyla zpracována" . "<br>";
-    } elseif ($status == "SENT") {
-        $user_status = "Status: " . "Transakce byla odeslána" . "<br>";
-    } elseif ($status == "CANCELED") {
-        $user_status = "Status: " . "Transakce byla zrušena, zkuste to později nebo kontaktujte technickou podporu." . $status . "<br>";
-    } else {
-        $user_status = $status;
-    }
-
-
     return [
         'total' => $totalBTC,
-        'fee' => $totalFee,
-        'status' => $status,
-        'user_status' => $user_status
+        'fee' => $totalFee
     ];
     
     
@@ -287,3 +269,19 @@ function withdrawal($clientId, $publicKey, $privateKey, $nonce, $address, $amoun
     }
     return;
 }
+
+
+
+/*
+if ($status == "OK") {
+    $user_status = "Status: " . "Transakce byla přijata na vaši peněženku" . "<br>";
+} elseif ($status == "NEW") {
+    $user_status = "Status: " . "Transakce byla zaregistrována, ale ještě nebyla zpracována" . "<br>";
+} elseif ($status == "SENT") {
+    $user_status = "Status: " . "Transakce byla odeslána" . "<br>";
+} elseif ($status == "CANCELED") {
+    $user_status = "Status: " . "Transakce byla zrušena, zkuste to později nebo kontaktujte technickou podporu." . $status . "<br>";
+} else {
+    $user_status = $status;
+}
+*/
