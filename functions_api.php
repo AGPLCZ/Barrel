@@ -127,15 +127,21 @@ function saveTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $ord
 
     //var_dump($responseData);
 
-    $userId = 1; // ID uživatele, kterému transakce patří, zde musíte nastavit skutečné ID z vaší `users` tabulky
-
+    $userDatabase= DB::queryFirstRow("SELECT * FROM users WHERE order_id=%s", $orderId);
+    if (isset($userDatabase) && isset($userDatabase['user_id'])) {
+        $userId = $userDatabase['user_id'];
+    }else{
+        echo "Chyba, neexistuje userId / user_id";
+        exit;
+    }
+    
     // Vložení údajů o transakci do tabulky `transactions`
     DB::insert('transactions', array(
         'user_id' => $userId,
         'amount_btc' => $totalBTC,
         'transaction_fee' => $totalFee,
-        'orderId' => $orderId,
-        'transactionId' => $transactionId
+        'order_id' => $orderId,
+        'transaction_id' => $transactionId
         // 'created_at' a 'updated_at' by měly být automaticky nastaveny, pokud jste je definovali jako TIMESTAMP v SQL
     ));
 

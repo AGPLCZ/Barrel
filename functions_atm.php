@@ -13,17 +13,23 @@ function url()
     $urls = isset($urlSegments[0]) ? $urlSegments[0] : '';
 
     // Druhý segment cesty (např. 'nazev_clanku'), pokud existuje
-     $urlss = isset($urlSegments[1]) ? $urlSegments[1] : '';
+    $urlss = isset($urlSegments[1]) ? $urlSegments[1] : '';
 
 
     // Vrácení obou hodnot v poli
-    
+
     return [
         'urls' => $urls,
         'urlss' => $urlss
     ];
 }
 
+function redirection($base_url, $userString)
+{
+    echo $base_url . "/" .  "barrel/" . $userString  . "/";
+    header("Location: " . $base_url . "/" .  "barrel/" . $userString  . "/");
+    exit();
+}
 
 function url_user()
 {
@@ -51,12 +57,19 @@ function user($userString)
 }
 
 
-function getUserData($userString) {
+function getUserData($userString)
+{
     return DB::queryFirstRow("SELECT * FROM users WHERE user_string=%s", $userString);
 }
 
+function getTransactionsOrderId($order_id)
+{
+    return DB::queryFirstRow("SELECT * FROM transactions WHERE order_id=%s", $order_id);
+}
+
 // realizuj nákup
-function executePurchase($user, $clientId, $publicKey, $privateKey, $nonce) {
+function executePurchase($user, $clientId, $publicKey, $privateKey, $nonce)
+{
     if (is_null($user['buy'])) {
         $orderId = buy($clientId, $publicKey, $privateKey, $nonce, $user['total_amount_czk']);
         if ($orderId) {
@@ -72,7 +85,8 @@ function executePurchase($user, $clientId, $publicKey, $privateKey, $nonce) {
 
 
 // pošli BTC
-function sendBTC($user, $clientId, $publicKey, $privateKey, $nonce) {
+function sendBTC($user, $clientId, $publicKey, $privateKey, $nonce)
+{
     if (isset($_POST["btc"])) {
         $address = $_POST["adress"];
         $totalBTC = getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $user['order_id']);
@@ -83,7 +97,8 @@ function sendBTC($user, $clientId, $publicKey, $privateKey, $nonce) {
 
 
 
-function displayUserStatus($user) {
+function displayUserStatus($user)
+{
     if ($user['buy'] == 'NAKOUPENO') {
         echo "Nákup na Coinmate úspěšně proveden.<br>";
         // Zde můžete přidat logiku pro zobrazení dalších informací nebo formulářů
@@ -91,6 +106,3 @@ function displayUserStatus($user) {
         echo "Uživatel s identifikátorem {$user['user_string']} nebyl nalezen nebo jiný problém.";
     }
 }
-
-
-
