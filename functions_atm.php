@@ -89,7 +89,6 @@ function sendBTC($userString, $clientId, $publicKey, $privateKey, $nonce, $adres
     $totalBTC = getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $userString['order_id']);
     withdrawal($clientId, $publicKey, $privateKey, $nonce, $adress, $totalBTC['total']);
 
-
 }
 
 

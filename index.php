@@ -5,7 +5,7 @@ error_reporting(E_ERROR | E_WARNING);
 require_once "config.php";
 require_once 'functions_api.php';
 require_once 'functions_atm.php';
-
+require_once 'vendor/autoload.php';
 
 
 
@@ -20,7 +20,7 @@ echo "Vloženo: " . $totalAmount . " Kč<br>";
 // NAŠTENÍ SQL DAT PRO DALŠÍ POUŽITÍ
 $userDatabase = getUserData($userString);
 
-/*
+
 //NÁKUP
 if (isset($userDatabase) && is_null($userDatabase['order_id'])) {
     // Provést nákup, pokud existují data uživatele a 'order_id' je NULL
@@ -53,25 +53,20 @@ if (isset($userDatabase) && isset($userDatabase['order_id'])) {
     echo "<br>";
     echo $price['user_status'];
 }
-*/
 
 
 
+// ODESLAT
 if (isset($_POST["submit"])) {
+    $validator = new Kielabokkie\Bitcoin\AddressValidator();
     $address = $_POST["address"];
-    $addressValidator = isValidBTCAddress($address);
-
-
-    if ($addressValidator == true) {
+    if ($validator->isValid($address)) {
         echo "Bitcoinová adresa je platná.";
         //sendBTC($userString, $clientId, $publicKey, $privateKey, $nonce,$adress);
     } else {
         echo "Bitcoinová adresa je neplatná.";
     }
 }
-
-
-
 
 
 

@@ -1,0 +1,77 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "53edae364f957b35def37cc4936c1a62",
+    "packages": [
+        {
+            "name": "kielabokkie/bitcoin-address-validator",
+            "version": "v2.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kielabokkie/bitcoin-address-validator.git",
+                "reference": "0efa6965715600c52f7c583e76b0ae0bfac063be"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/kielabokkie/bitcoin-address-validator/zipball/0efa6965715600c52f7c583e76b0ae0bfac063be",
+                "reference": "0efa6965715600c52f7c583e76b0ae0bfac063be",
+                "shasum": ""
+            },
+            "require": {
+                "ext-bcmath": "*",
+                "php": "^7.3|^7.4|^8.0|^8.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^7.5|^8.0|^9.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Kielabokkie\\Bitcoin\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "kielabokkie",
+                    "email": "kielabokkie@gmail.com"
+                }
+            ],
+            "description": "Validate legacy, segwit, native segwit (bech32) and taproot Bitcoin addresses",
+            "keywords": [
+                "address",
+                "bech32",
+                "bitcoin",
+                "segwit",
+                "validation",
+                "validator"
+            ],
+            "support": {
+                "issues": "https://github.com/kielabokkie/bitcoin-address-validator/issues",
+                "source": "https://github.com/kielabokkie/bitcoin-address-validator/tree/v2.2.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/kielabokkie",
+                    "type": "github"
+                }
+            ],
+            "time": "2023-09-28T08:27:59+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": [],
+    "plugin-api-version": "2.3.0"
+}
