@@ -5,6 +5,9 @@ error_reporting(E_ERROR | E_WARNING);
 require_once "config.php";
 require_once 'functions_api.php';
 require_once 'functions_atm.php';
+require_once 'bitcoin-address-validator/AddressValidator.php';
+
+
 
 // ADRESA
 $url = url();
@@ -12,12 +15,12 @@ $userString = $url['urlss'];
 
 // VLOŽENO BANKOVEK
 $totalAmount = user($userString);
-echo "Vloženo:" . $totalAmount . "<br>";
+echo "Vloženo: " . $totalAmount . " Kč<br>";
 
 // NAŠTENÍ SQL DAT PRO DALŠÍ POUŽITÍ
 $userDatabase = getUserData($userString);
 
-
+/*
 //NÁKUP
 if (isset($userDatabase) && is_null($userDatabase['order_id'])) {
     // Provést nákup, pokud existují data uživatele a 'order_id' je NULL
@@ -41,6 +44,7 @@ if (isset($userDatabase) && isset($userDatabase['order_id'])) {
 }
 
 
+
 // STATUS
 if (isset($userDatabase) && isset($userDatabase['order_id'])) {
     $orderId = $userDatabase['order_id'];
@@ -49,12 +53,37 @@ if (isset($userDatabase) && isset($userDatabase['order_id'])) {
     echo "<br>";
     echo $price['user_status'];
 }
+*/
+
+if (isset($_POST["submit"])) {
+    
+    $adress = $_POST["adress"]; // Bitcoin adresa z vašeho formuláře
+    $validator = new \Kielabokkie\Bitcoin\AddressValidator;
+
+    if ($validator->isValid($adress)) {
+        echo "Bitcoinová adresa je platná.";
+        //sendBTC($userString, $clientId, $publicKey, $privateKey, $nonce,$adress);
+    } else {
+        echo "Bitcoinová adresa je neplatná.";
+    }
+    
+
+}
+
+?>
 
 
+<!doctype html>
+<html lang="cs">
 
+<head>
+</head>
 
+<body>
+    <form action="index.php" method="post">
+        <input type="text" name="adress" placeholder="BTC adresa">
+        <button type="submit" name="submit">Odeslat</button>
+    </form>
 
-displayUserStatus($userString);
-
-
-sendBTC($user, $clientId, $publicKey, $privateKey, $nonce);
+</body>
+</html>

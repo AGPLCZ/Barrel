@@ -281,8 +281,9 @@ function withdrawal($clientId, $publicKey, $privateKey, $nonce, $address, $amoun
     // Kontrola, zda bylo ID transakce nalezeno, a jeho výpis
     if ($transactionId !== null) {
         echo "ID transakce: " . $transactionId;
+        echo $status;
     } else {
-        echo "Transakce neproběhla, došlo k chybě.";
+        echo "Transakce neproběhla, došlo k chybě." . $status;
     }
-    return $status;
+    return;
 }

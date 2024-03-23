@@ -67,7 +67,7 @@ function getTransactionsOrderId($order_id)
     return DB::queryFirstRow("SELECT * FROM transactions WHERE order_id=%s", $order_id);
 }
 
-// realizuj nákup
+
 function executePurchase($user, $clientId, $publicKey, $privateKey, $nonce)
 {
     if (is_null($user['buy'])) {
@@ -84,15 +84,12 @@ function executePurchase($user, $clientId, $publicKey, $privateKey, $nonce)
 }
 
 
-// pošli BTC
-function sendBTC($userString, $clientId, $publicKey, $privateKey, $nonce)
+function sendBTC($userString, $clientId, $publicKey, $privateKey, $nonce, $adress)
 {
-    if (isset($_POST["btc"])) {
-        $address = $_POST["adress"];
-        $totalBTC = getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $userString['order_id']);
-        return withdrawal($clientId, $publicKey, $privateKey, $nonce, $address, $totalBTC['total']);
-    }
-    return null;
+    $totalBTC = getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $userString['order_id']);
+    withdrawal($clientId, $publicKey, $privateKey, $nonce, $adress, $totalBTC['total']);
+
+
 }
 
 
