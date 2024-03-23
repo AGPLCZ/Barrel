@@ -5,7 +5,7 @@ error_reporting(E_ERROR | E_WARNING);
 require_once "config.php";
 require_once 'functions_api.php';
 require_once 'functions_atm.php';
-require_once 'bitcoin-address-validator/AddressValidator.php';
+
 
 
 
@@ -55,20 +55,25 @@ if (isset($userDatabase) && isset($userDatabase['order_id'])) {
 }
 */
 
-if (isset($_POST["submit"])) {
-    
-    $adress = $_POST["adress"]; // Bitcoin adresa z vašeho formuláře
-    $validator = new \Kielabokkie\Bitcoin\AddressValidator;
 
-    if ($validator->isValid($adress)) {
+
+if (isset($_POST["submit"])) {
+    $address = $_POST["address"];
+    $addressValidator = isValidBTCAddress($address);
+
+
+    if ($addressValidator == true) {
         echo "Bitcoinová adresa je platná.";
         //sendBTC($userString, $clientId, $publicKey, $privateKey, $nonce,$adress);
     } else {
         echo "Bitcoinová adresa je neplatná.";
     }
-    
-
 }
+
+
+
+
+
 
 ?>
 
@@ -81,9 +86,10 @@ if (isset($_POST["submit"])) {
 
 <body>
     <form action="index.php" method="post">
-        <input type="text" name="adress" placeholder="BTC adresa">
+        <input type="text" name="address" placeholder="BTC adresa">
         <button type="submit" name="submit">Odeslat</button>
     </form>
 
 </body>
+
 </html>

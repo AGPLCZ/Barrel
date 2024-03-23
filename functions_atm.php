@@ -103,3 +103,18 @@ function displayUserStatus($user)
         echo "Uživatel s identifikátorem {$user['user_string']} nebyl nalezen nebo jiný problém.";
     }
 }
+
+
+
+
+function isValidBTCAddress($address) {
+    if (preg_match('/^1[a-km-zA-HJ-NP-Z1-9]{25,34}$/', $address)) {
+        return true; // P2PKH
+    } elseif (preg_match('/^3[a-km-zA-HJ-NP-Z1-9]{25,34}$/', $address)) {
+        return true; // P2SH
+    } elseif (preg_match('/^bc1[a-z0-9]{39,59}$/', $address)) {
+        return true; // Bech32
+    }
+    return false;
+}
+
