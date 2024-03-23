@@ -13,9 +13,9 @@ $userString = $url['urlss'];
 // VLOŽENO BANKOVEK
 $totalAmount = user($userString);
 echo "Vloženo:" . $totalAmount;
+
+// NAŠTENÍ SQL DAT PRO DALŠÍ POUŽITÍ
 $userDatabase = getUserData($userString);
-
-
 
 //NÁKUP
 if (isset($userDatabase) && is_null($userDatabase['order_id'])) {
@@ -25,7 +25,6 @@ if (isset($userDatabase) && is_null($userDatabase['order_id'])) {
         redirection($base_url, $userString);
     }
 }
-
 
 // ULOŽIT SMĚNY Z COINMATE DO "transactions" DATABÁZE
 if (isset($userDatabase) && isset($userDatabase['order_id'])) {
@@ -39,10 +38,7 @@ if (isset($userDatabase) && isset($userDatabase['order_id'])) {
 }
 
 
-
-
-
-
+getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orderId);
 
 
 /*

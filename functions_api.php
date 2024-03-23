@@ -18,10 +18,6 @@ function createSignature($clientId, $publicKey, $privateKey, $nonce)
 }
 
 // BUY
-/*
-$totalAmount = "190";
-$orderId = buy($clientId, $publicKey, $privateKey, $nonce, $totalAmount);
-*/
 function buy($clientId, $publicKey, $privateKey, $nonce, $totalAmount)
 {
 
@@ -71,10 +67,7 @@ function buy($clientId, $publicKey, $privateKey, $nonce, $totalAmount)
 }
 
 
-// How much BTC ----------------------------------------------
-/*
-$orderId = "2658254491";
-*/
+
 function saveTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orderId)
 {
 
@@ -154,12 +147,6 @@ function saveTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $ord
 }
 
 
-
-
-// How much BTC ----------------------------------------------
-/*
-$orderId = "2658254491";
-*/
 function getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orderId)
 {
 
@@ -192,7 +179,6 @@ function getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orde
 
     $responseData = json_decode($response, true);
 
-    $status = "-";
     $totalBTC = 0;
     $totalFee = 0;
 
@@ -210,8 +196,8 @@ function getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orde
     $totalBTC = number_format($totalBTC, 8);
     $totalFee = number_format($totalFee, 8);
 
-    echo "Celková částka BTC: " . $totalBTC . " BTC<br>";
-    echo "Celkový poplatek: " . $totalFee . " CZK<br>";
+    echo "Nakoupeno: " . $totalBTC . " BTC<br>";
+    echo "Poplatek: " . $totalFee . " CZK<br>";
 
     return $totalBTC;
 }
