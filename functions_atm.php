@@ -33,11 +33,9 @@ function url_user()
     return  "https:dobrodruzi.cz/coinmate/" . $userString;
 }
 
-function user()
+function user($userString)
 {
-    // URL
-    $url = url();
-    $userString = $url['urlss'];
+
 
     // Získáme všechny záznamy s odpovídajícím user_string
     $users = DB::query("SELECT * FROM users WHERE user_string=%s", $userString);
