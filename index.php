@@ -12,13 +12,22 @@ require_once 'vendor/autoload.php';
 // ADRESA
 $url = url();
 $userString = $url['urlss'];
+echo "Id číslo objednávky: " . $userString . "<br>";
+
+// NAŠTENÍ SQL DAT PRO DALŠÍ POUŽITÍ
+$userDatabase = getUserData($userString);
+
 
 // VLOŽENO BANKOVEK
 $totalAmount = user($userString);
 echo "Vloženo: " . $totalAmount . " Kč<br>";
 
-// NAŠTENÍ SQL DAT PRO DALŠÍ POUŽITÍ
-$userDatabase = getUserData($userString);
+
+//ZOBRAZENÍ
+//echo ($userDatabase['order_id']);
+if (isset($userDatabase['btc_address'])) {
+    echo "Vaše adresa:" . ($userDatabase['btc_address']);
+}
 
 
 //NÁKUP
@@ -63,8 +72,8 @@ if (isset($_POST["submit"])) {
     }
 
     if ($validator->isValid($address)) {
-        echo "Bitcoinová adresa je platná.";
-        //sendBTC($userString, $clientId, $publicKey, $privateKey, $nonce,$adress);
+        echo "Vaše adresa: " . $address;
+        sendBTC($userString, $clientId, $publicKey, $privateKey, $nonce, $address, $price, $orderId);
     } else {
         echo
         "Bitcoinová adresa je neplatná.";
@@ -86,7 +95,7 @@ if (isset($_POST["submit"])) {
 
     <?php
 
-    if (!isset($_POST["submit"])) :
+    if (!isset($_POST["submit"]) && ($userDatabase['btc_address'] == NULL)) :
 
     ?>
         <form action="index.php" method="post">

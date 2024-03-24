@@ -213,7 +213,7 @@ function getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orde
 }
 
 
-function withdrawal($clientId, $publicKey, $privateKey, $nonce, $address, $amount)
+function withdrawal($clientId, $publicKey, $privateKey, $nonce, $address, $amount, $orderId)
 {
 
     //$address ="bc1q9aslcgj4203926f45aazn2cnzmvwhc0g5d5h5j";
@@ -248,7 +248,7 @@ function withdrawal($clientId, $publicKey, $privateKey, $nonce, $address, $amoun
 
     // Dekódování a zobrazení odpovědi
     $responseData = json_decode($response, true);
-    var_dump($responseData);
+    //var_dump($responseData);
 
 
     // Inicializace proměnné
@@ -256,18 +256,24 @@ function withdrawal($clientId, $publicKey, $privateKey, $nonce, $address, $amoun
 
     // Kontrola, zda neexistuje chyba a jestli je 'data' k dispozici
     if (!$responseData['error'] && is_null($responseData['errorMessage']) && isset($responseData['data'])) {
-        $transactionId = $responseData['data'];
+        $withdrawalId = $responseData['data'];
         $status = $responseData['status'];
+        $error = $responseData['errorMessage'];
+
+        DB::update('users', [
+            'withdrawal_id' => $withdrawalId,
+            'status' => $status,
+            'error' => $error
+        ], "user_string=%s", $orderId);
     }
 
-    // Kontrola, zda bylo ID transakce nalezeno, a jeho výpis
-    if ($transactionId !== null) {
-        echo "ID transakce: " . $transactionId;
-        echo $status;
-    } else {
-        echo "Transakce neproběhla, došlo k chybě." . $status;
-    }
-    return;
+
+    return [
+        'withdrawalId' => $withdrawalId,
+        'status' => $status,
+        'error' => "Transakce neproběhla, došlo k chybě." . $error
+    ];
+        
 }
 
 

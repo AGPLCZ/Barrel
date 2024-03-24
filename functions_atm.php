@@ -41,8 +41,6 @@ function url_user()
 
 function user($userString)
 {
-
-
     // Získáme všechny záznamy s odpovídajícím user_string
     $users = DB::query("SELECT * FROM users WHERE user_string=%s", $userString);
     $totalAmount = 0;
@@ -53,18 +51,35 @@ function user($userString)
     }
     //echo "Celková vložená částka: $totalAmount CZK<br>";
 
-    return $totalAmount;
+    if (!$users) {
+        echo "Uživatel nebyl nalezen. Kontaktujte technickou podporu.";
+        return 0;
+    } else {
+        return $totalAmount;
+    }
 }
 
 
 function getUserData($userString)
 {
-    return DB::queryFirstRow("SELECT * FROM users WHERE user_string=%s", $userString);
+    $query = DB::queryFirstRow("SELECT * FROM users WHERE user_string=%s", $userString);
+    if (!$query) {
+        echo "Uživatel nebyl nalezen. Kontaktujte technickou podporu.";
+        die; // Zastaví vykonávání skriptu
+    } else {
+        return $query;
+    }
 }
 
 function getTransactionsOrderId($order_id)
 {
-    return DB::queryFirstRow("SELECT * FROM transactions WHERE order_id=%s", $order_id);
+    $query = DB::queryFirstRow("SELECT * FROM transactions WHERE order_id=%s", $order_id);
+    if (!$query) {
+        echo "error_id:12";
+        die; // Zastaví vykonávání skriptu
+    } else {
+        return $query;
+    }
 }
 
 
@@ -84,10 +99,17 @@ function executePurchase($user, $clientId, $publicKey, $privateKey, $nonce)
 }
 
 
-function sendBTC($userString, $clientId, $publicKey, $privateKey, $nonce, $adress)
+function sendBTC($userString, $clientId, $publicKey, $privateKey, $nonce, $address, $amount, $orderId)
 {
-    $totalBTC = getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $userString['order_id']);
-    withdrawal($clientId, $publicKey, $privateKey, $nonce, $adress, $totalBTC['total']);
+   
+
+    if ($userString) {
+        DB::update('users', [
+            'btc_address' => $address,
+        ], "user_string=%s", $userString);
+    }
+
+    return withdrawal($clientId, $publicKey, $privateKey, $nonce, $address, $amount, $orderId);
 
 }
 
@@ -106,7 +128,8 @@ function displayUserStatus($user)
 
 
 
-function isValidBTCAddress($address) {
+function isValidBTCAddress($address)
+{
     if (preg_match('/^1[a-km-zA-HJ-NP-Z1-9]{25,34}$/', $address)) {
         return true; // P2PKH
     } elseif (preg_match('/^3[a-km-zA-HJ-NP-Z1-9]{25,34}$/', $address)) {
@@ -116,4 +139,3 @@ function isValidBTCAddress($address) {
     }
     return false;
 }
-
