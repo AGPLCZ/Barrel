@@ -73,35 +73,29 @@ function getUserData($userString)
 
 function getTransactionsOrderId($order_id)
 {
-    $query = DB::queryFirstRow("SELECT * FROM transactions WHERE order_id=%s", $order_id);
-    if (!$query) {
-        echo "error_id:12";
-        die; // Zastaví vykonávání skriptu
-    } else {
-        return $query;
-    }
+    return DB::queryFirstRow("SELECT * FROM transactions WHERE order_id=%s", $order_id);
+    
 }
 
 
-function executePurchase($user, $clientId, $publicKey, $privateKey, $nonce)
+function executePurchase($userDatabase, $clientId, $publicKey, $privateKey, $nonce)
 {
-    if (is_null($user['buy'])) {
-        $orderId = buy($clientId, $publicKey, $privateKey, $nonce, $user['total_amount_czk']);
+    if (is_null($userDatabase['buy'])) {
+        $orderId = buy($clientId, $publicKey, $privateKey, $nonce, $userDatabase['total_amount_czk']);
         if ($orderId) {
             DB::update('users', [
                 'buy' => 'NAKOUPENO',
                 'order_id' => $orderId
-            ], "user_string=%s", $user['user_string']);
+            ], "user_string=%s", $userDatabase['user_string']);
             return $orderId;
         }
     }
-    return null;
+    
 }
 
 
 function sendBTC($userString, $clientId, $publicKey, $privateKey, $nonce, $address, $amount, $orderId)
 {
-   
 
     if ($userString) {
         DB::update('users', [

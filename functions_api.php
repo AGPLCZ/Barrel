@@ -53,7 +53,7 @@ function buy($clientId, $publicKey, $privateKey, $nonce, $totalAmount)
 
     // Dekódování a zobrazení odpovědi
     $responseData = json_decode($response, true);
-    //var_dump($responseData);
+    var_dump($responseData);
 
 
     // Získané údaje z API odpovědi
@@ -118,7 +118,7 @@ function saveTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $ord
     //$totalFee = number_format($totalFee, 8);
 
 
-    //var_dump($responseData);
+    var_dump($responseData);
 
     $userDatabase= DB::queryFirstRow("SELECT * FROM users WHERE order_id=%s", $orderId);
     if (isset($userDatabase) && isset($userDatabase['user_id'])) {
@@ -132,11 +132,13 @@ function saveTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $ord
     DB::insert('transactions', array(
         'user_id' => $userId,
         'amount_btc' => $totalBTC,
-        'transaction_fee' => $totalFee,
+        'transaction_fee' => $transaction['fee'],
+        'total_fee' => $totalFee,
         'order_id' => $orderId,
         'transaction_id' => $transactionId
         // 'created_at' a 'updated_at' by měly být automaticky nastaveny, pokud jste je definovali jako TIMESTAMP v SQL
     ));
+
 
     // Kontrola úspěchu
     if (DB::affectedRows() > 0) {
@@ -197,7 +199,7 @@ function getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orde
             }
         }
     }
-    //var_dump($responseData);
+    var_dump($responseData);
     $totalBTC = number_format($totalBTC, 8);
     $totalFee = number_format($totalFee, 8);
 
@@ -248,11 +250,11 @@ function withdrawal($clientId, $publicKey, $privateKey, $nonce, $address, $amoun
 
     // Dekódování a zobrazení odpovědi
     $responseData = json_decode($response, true);
-    //var_dump($responseData);
+    var_dump($responseData);
 
 
     // Inicializace proměnné
-    $transactionId = null;
+    $withdrawalId = null;
 
     // Kontrola, zda neexistuje chyba a jestli je 'data' k dispozici
     if (!$responseData['error'] && is_null($responseData['errorMessage']) && isset($responseData['data'])) {

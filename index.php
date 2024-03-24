@@ -80,8 +80,14 @@ if (isset($_POST["submit"])) {
     }
 }
 
+/*
+Chyba, směna na Coinmate nebyla realizována. Vaše adresa: bc1q9aslcgj4203926f45aazn2cnzmvwhc0g5d5h5j
+Warning: Undefined variable $price in /home/html/dobrodruzi.cz/public_html/www/barrel/index.php on line 76
+array(3) { ["error"]=> bool(true) ["errorMessage"]=> string(18) "Api internal error" ["data"]=> NULL }
+Warning: Undefined variable $status in /home/html/dobrodruzi.cz/public_html/www/barrel/functions_api.php on line 273
 
-
+Warning: Undefined variable $error in /home/html/dobrodruzi.cz/public_html/www/barrel/functions_api.php on line 274
+*/
 ?>
 
 
@@ -107,3 +113,4 @@ if (isset($_POST["submit"])) {
 </body>
 
 </html>
+
