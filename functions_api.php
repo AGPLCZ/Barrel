@@ -68,7 +68,7 @@ function buy($clientId, $publicKey, $privateKey, $nonce, $totalAmount)
 
 
 
-function saveTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orderId)
+function saveTransactionDetails_org($clientId, $publicKey, $privateKey, $nonce, $orderId)
 {
 
     // Generování podpisu
@@ -120,14 +120,14 @@ function saveTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $ord
 
     var_dump($responseData);
 
-    $userDatabase= DB::queryFirstRow("SELECT * FROM users WHERE order_id=%s", $orderId);
+    $userDatabase = DB::queryFirstRow("SELECT * FROM users WHERE order_id=%s", $orderId);
     if (isset($userDatabase) && isset($userDatabase['user_id'])) {
         $userId = $userDatabase['user_id'];
-    }else{
+    } else {
         echo "Chyba, neexistuje userId / user_id";
         exit;
     }
-    
+
     // Vložení údajů o transakci do tabulky `transactions`
     DB::insert('transactions', array(
         'user_id' => $userId,
@@ -139,6 +139,89 @@ function saveTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $ord
         // 'created_at' a 'updated_at' by měly být automaticky nastaveny, pokud jste je definovali jako TIMESTAMP v SQL
     ));
 
+    // Kontrola úspěchu
+    if (DB::affectedRows() > 0) {
+        return [
+            'total' => $totalBTC,
+            'fee' => $totalFee
+        ];
+    } else {
+        return "Nepodařilo se uložit transakci do databáze.";
+    }
+}
+
+
+
+
+function saveTransactionDetails_gpt($clientId, $publicKey, $privateKey, $nonce, $orderId)
+{
+    // Generování podpisu
+    $signature = createSignature($clientId, $publicKey, $privateKey, $nonce);
+
+    $ch = curl_init();
+
+    curl_setopt($ch, CURLOPT_URL, "https://coinmate.io/api/transactionHistory");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($ch, CURLOPT_HEADER, FALSE);
+    curl_setopt($ch, CURLOPT_POST, TRUE);
+
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+        'clientId' => $clientId,
+        'publicKey' => $publicKey,
+        'nonce' => $nonce,
+        'signature' => $signature,
+        'limit' => 50, // Nastavte limit podle vašich potřeb
+        'sort' => 'DESC', // Nejnovější transakce první
+        'orderId' => $orderId // Filtruje transakce podle ID pokynu
+    ]));
+
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "Content-Type: application/x-www-form-urlencoded"
+    ]);
+
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    $responseData = json_decode($response, true);
+
+    $userDatabase = DB::queryFirstRow("SELECT * FROM users WHERE order_id=%s", $orderId);
+    if (!isset($userDatabase) || !isset($userDatabase['user_id'])) {
+        echo "Chyba, neexistuje userId / user_id";
+        exit;
+    }
+    $userId = $userDatabase['user_id'];
+
+    if (!$responseData['error'] && isset($responseData['data'])) {
+        foreach ($responseData['data'] as $transaction) {
+            if ($transaction['orderId'] == $orderId) {
+                // Vložení každé jednotlivé transakce do tabulky `transactions`
+                DB::insert('transactions', array(
+                    'user_id' => $userId,
+                    'amount_btc' => $transaction['amount'],
+                    'transaction_fee' => $transaction['fee'],
+                    'order_id' => $orderId,
+                    'transaction_id' => $transaction['transactionId']
+                    // 'created_at' a 'updated_at' by měly být automaticky nastaveny, pokud jste je definovali jako TIMESTAMP v SQL
+                ));
+            }
+        }
+    }
+
+    $totalBTC = 0;
+    $totalFee = 0;
+
+    if (!$responseData['error'] && isset($responseData['data'])) {
+        foreach ($responseData['data'] as $transaction) {
+
+            if ($transaction['orderId'] == $orderId) {
+                $totalBTC += $transaction['amount'];
+                $totalFee += $transaction['fee'];
+            }
+        }
+    }
+
+    // Aktualizace součtu poplatků v tabulce `users`
+    DB::query("UPDATE users SET total_fee = total_fee + %d WHERE user_id=%s", $totalFee, $userId);
 
     // Kontrola úspěchu
     if (DB::affectedRows() > 0) {
@@ -149,10 +232,77 @@ function saveTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $ord
     } else {
         return "Nepodařilo se uložit transakci do databáze.";
     }
-
-
-   
 }
+
+
+
+
+function saveTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orderId)
+{
+
+    $userDatabase = DB::queryFirstRow("SELECT * FROM users WHERE order_id=%s", $orderId);
+    if (isset($userDatabase) && !isset($userDatabase['total_btc'])) {
+
+
+
+        // Generování podpisu
+        $signature = createSignature($clientId, $publicKey, $privateKey, $nonce);
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, "https://coinmate.io/api/transactionHistory");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_HEADER, FALSE);
+        curl_setopt($ch, CURLOPT_POST, TRUE);
+
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+            'clientId' => $clientId,
+            'publicKey' => $publicKey,
+            'nonce' => $nonce,
+            'signature' => $signature,
+            'limit' => 50, // Nastavte limit podle vašich potřeb
+            'sort' => 'DESC', // Nejnovější transakce první
+            'orderId' => $orderId // Filtruje transakce podle ID pokynu
+        ]));
+
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "Content-Type: application/x-www-form-urlencoded"
+        ]);
+
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $responseData = json_decode($response, true);
+
+
+        $totalBTC = 0;
+        $totalFee = 0;
+
+        if (!$responseData['error'] && isset($responseData['data'])) {
+            foreach ($responseData['data'] as $transaction) {
+
+                if ($transaction['orderId'] == $orderId) {
+                    $totalBTC += $transaction['amount'];
+                    $totalFee += $transaction['fee'];
+                }
+            }
+        }
+
+        DB::update('users', [
+            'total_fee' => $totalFee,
+            'total_btc' => $totalBTC
+        ], "order_id=%s", $orderId);
+
+
+        return [
+            'total' => $totalBTC,
+            'fee' => $totalFee
+        ];
+    }
+}
+
+
+
 
 
 function getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orderId)
@@ -199,7 +349,7 @@ function getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orde
             }
         }
     }
-    var_dump($responseData);
+    //var_dump($responseData);
     $totalBTC = number_format($totalBTC, 8);
     $totalFee = number_format($totalFee, 8);
 
@@ -210,8 +360,6 @@ function getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orde
         'total' => $totalBTC,
         'fee' => $totalFee
     ];
-    
-    
 }
 
 
@@ -250,35 +398,35 @@ function withdrawal($clientId, $publicKey, $privateKey, $nonce, $address, $amoun
 
     // Dekódování a zobrazení odpovědi
     $responseData = json_decode($response, true);
-    var_dump($responseData);
+    //var_dump($responseData);
 
 
     // Inicializace proměnné
     $withdrawalId = null;
+    $error = null;
+
+
 
     // Kontrola, zda neexistuje chyba a jestli je 'data' k dispozici
     if (!$responseData['error'] && is_null($responseData['errorMessage']) && isset($responseData['data'])) {
         $withdrawalId = $responseData['data'];
-        $status = $responseData['status'];
         $error = $responseData['errorMessage'];
 
         DB::update('users', [
             'withdrawal_id' => $withdrawalId,
-            'status' => $status,
             'error' => $error
         ], "user_string=%s", $orderId);
     }
 
 
-    return [
-        'withdrawalId' => $withdrawalId,
-        'status' => $status,
-        'error' => "Transakce neproběhla, došlo k chybě." . $error
-    ];
-        
+    return $withdrawalId;
 }
 
 
+
+
+
+//Ověření 
 
 /*
 if ($status == "OK") {

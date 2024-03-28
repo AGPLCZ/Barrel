@@ -25,9 +25,17 @@ echo "Vloženo: " . $totalAmount . " Kč<br>";
 
 //ZOBRAZENÍ
 //echo ($userDatabase['order_id']);
-if (isset($userDatabase['btc_address'])) {
-    echo "Vaše adresa:" . ($userDatabase['btc_address']);
+if ($userDatabase['btc_address']) {
+    echo "Vaše adresa: " . ($userDatabase['btc_address']) . "<br>";
 }
+if ($userDatabase['total_btc']) {
+    echo "Nakoupeno: " . ($userDatabase['total_btc']) . " BTC<br>";
+}
+if ($userDatabase['total_fee']) {
+    echo "Poplatek burzy: " . ($userDatabase['total_fee']) . " Kč<br>";
+}
+
+
 
 
 //NÁKUP
@@ -49,34 +57,47 @@ if (isset($userDatabase) && isset($userDatabase['order_id'])) {
     $transactionsDatabase = getTransactionsOrderId($orderId);
     if (empty($transactionsDatabase)) {
         $price = saveTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orderId);
-        echo "Nakoupeno: " . $price['total'] . "BTC";
+        if ($price) {
+            echo "Nakoupeno: " . $price['total'] . "BTC";
+        }
     }
 }
 
+/*
+ // STATUS
+ if (isset($userDatabase) && isset($userDatabase['order_id'])) {
 
-
+    $orderId = $userDatabase['order_id'];
+    $price = getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orderId);
+    if ($price) {
+        echo "Nakoupeno: " . $price['total'] . "BTC";
+        echo "<br>";
+        //echo $price['fee'];
+    }
+}
+*/
 
 // ODESLAT
 if (isset($_POST["submit"])) {
     $validator = new Kielabokkie\Bitcoin\AddressValidator();
     $address = $_POST["address"];
 
+    $userDatabase = getUserData($userString);
 
-    // STATUS
-    if (isset($userDatabase) && isset($userDatabase['order_id'])) {
-        $orderId = $userDatabase['order_id'];
-        $price = getTransactionDetails($clientId, $publicKey, $privateKey, $nonce, $orderId);
-        echo "Nakoupeno: " . $price['total'] . "BTC";
-        echo "<br>";
-        //echo $price['fee'];
-    }
+    if ($userDatabase['total_fee']) {
+        if ($validator->isValid($address)) {
+            $info = sendBTC($userString, $clientId, $publicKey, $privateKey, $nonce, $address, $userDatabase['total_fee'], $orderId);
 
-    if ($validator->isValid($address)) {
-        echo "Vaše adresa: " . $address;
-        sendBTC($userString, $clientId, $publicKey, $privateKey, $nonce, $address, $price, $orderId);
-    } else {
-        echo
-        "Bitcoinová adresa je neplatná.";
+            if ($info){
+                echo $info['withdrawalId'];
+                echo $info['status'];
+                echo $info['error'];
+            }
+
+        } else {
+            echo
+            "Bitcoinová adresa je neplatná.";
+        }
     }
 }
 
@@ -113,4 +134,3 @@ Warning: Undefined variable $error in /home/html/dobrodruzi.cz/public_html/www/b
 </body>
 
 </html>
-
